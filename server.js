@@ -12,6 +12,12 @@ const Question = require("./model/question.js");
 const Project = require("./model/project.js");
 var cors = require("cors");
 // var upload = multer({ dest: "uploads/" });
+const fs = require('fs');
+
+const options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+};
 
 const JWT_SECRET =
   "sdjkfh8923yhjdksbfma@#*(&@*!^#&@bhjb2qiuhesdbhjdsfg839ujkdhfjk";
@@ -297,3 +303,7 @@ var port_number = app.listen(process.env.PORT || 3000);
 app.listen(port_number, () => {
   console.log("Server up at 9999");
 });
+
+https.createServer(options, function (req, res) {
+  res.writeHead(200);
+}).listen(8000);
