@@ -1,1 +1,7 @@
 This is open source node.js and react.js project
+
+Tech:
+Node.js
+React.js
+MongoDb
+JWT
