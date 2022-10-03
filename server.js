@@ -1,7 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({ path: "./configs/.env" });
 const express = require("express"); // done
 const path = require("path");
-const bodyParser = require("body-parser");
 const mongoose = require("mongoose"); // done
 const User = require("./model/user");
 const bcrypt = require("bcryptjs");
@@ -12,15 +11,14 @@ const Question = require("./model/question.js");
 const Project = require("./model/project.js");
 var cors = require("cors");
 // var upload = multer({ dest: "uploads/" });
-const fs = require('fs');
+const fs = require("fs");
 
-const options = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
-};
+// const options = {
+//   key: fs.readFileSync("key.pem"),
+//   cert: fs.readFileSync("cert.pem"),
+// };
 
-const JWT_SECRET =
-  "sdjkfh8923yhjdksbfma@#*(&@*!^#&@bhjb2qiuhesdbhjdsfg839ujkdhfjk";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // mongoose.connect("mongodb://localhost:27017/login-app-db", {
 //   useNewUrlParser: true,
@@ -29,8 +27,13 @@ const JWT_SECRET =
 // });
 
 mongoose
-  .connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then((result) => console.log("Connected to database"))
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then((result) =>
+    console.log(`Connected to ${result.connection.host} database`)
+  )
   .catch((err) => console.log(err));
 
 // app.listen(4000);
@@ -41,25 +44,14 @@ app.use("/", express.static(path.join(__dirname, "static")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-
-app.get("/",(req,res)=>{
-   
-    res.send("hey welcome to ednet backend 😊😊");
+app.get("/", (req, res) => {
+  res.send("hey welcome to ednet backend 😊😊");
 });
 // --------------------------------vismay end point-------------------------------------------------------
 
-
 app.post("/AddQuestion", (req, res) => {
-  const que = new Question();
-  que.id = req.body.id;
-  que.Title = req.body.Title;
-  que.Que = req.body.Que;
-  que.Author = req.body.Author;
-  que.status = req.body.status;
-  que.Topic = req.body.Topic;
-  que.Cnt = req.body.Cnt;
-  que
-    .save()
+  const { id, Title, Que, Author, status, Topic, Cnt } = req.body;
+  Question.create({ id, Title, Que, Author, status, Topic, Cnt })
     .then((result) => {
       res.send(result);
     })
@@ -70,13 +62,8 @@ app.post("/AddQuestion", (req, res) => {
 
 app.post("/AddAnswer", (req, res) => {
   //done
-  const ans = new Answer();
-  ans.id = req.body.id;
-  ans.Author = req.body.Author;
-  ans.Comment = req.body.Comment;
-  ans.status = req.body.status;
-  ans
-    .save()
+  const { id, Author, Comment, status } = req.body;
+  Answer.create({ id, Author, Comment, status })
     .then((result) => {
       res.send(result);
     })
@@ -85,17 +72,10 @@ app.post("/AddAnswer", (req, res) => {
     });
 });
 
-app.post("/AddProject", async (req, res) => {
+app.post("/AddProject", (req, res) => {
   // done
-  console.log(req.body);
-  const pro = new Project();
-  //   pro.id = req.body.id;
-  pro.Author = req.body.Author;
-  pro.Title = req.body.Title;
-  pro.Description = req.body.Description;
-
-  await pro
-    .save()
+  const { Author, Title, Description } = req.body;
+  Project.create({ Author, Title, Description })
     .then((result) => {
       console.log("result", result, "body", req.body);
       res.send(result);
@@ -127,9 +107,7 @@ app.get("/GetProject", (req, res) => {
     .catch((err) => console.log(err));
 });
 
-
 // ------------ved end point------------------------------------------------
-
 
 const upload = multer({
   fileFilter(req, file, cb) {
@@ -271,9 +249,9 @@ app.post("/api/register", async (req, res) => {
       firstname: req.body.firstname,
       lastname: req.body.lastname,
       area_interest: arr,
-isAdmin: req.body.Status,
+      isAdmin: req.body.Status,
     });
-	response.isAdmin = req.body.Status;
+    response.isAdmin = req.body.Status;
     if (req.body.admincode === "John Reese") {
       response.isAdmin = true;
     }
@@ -295,15 +273,19 @@ isAdmin: req.body.Status,
   }
 
   //res.json({ status: 'ok' })
-  return res.status(200).json({ token: token, user_id: user._id ,status:"ok"});
+  return res
+    .status(200)
+    .json({ token: token, user_id: user._id, status: "ok" });
   //res.redirect("/api/profile")
 });
 
-var port_number = app.listen(process.env.PORT || 3000);
+var port_number = process.env.PORT || 3000;
 app.listen(port_number, () => {
-  console.log("Server up at 9999");
+  console.log(`Server up at ${port_number}`);
 });
 
-https.createServer(options, function (req, res) {
-  res.writeHead(200);
-}).listen(8000);
+// https
+//   .createServer(options, function (req, res) {
+//     res.writeHead(200);
+//   })
+//   .listen(8000);
